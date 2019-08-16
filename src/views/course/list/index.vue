@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { getCourseList } from '@/api/course/list'
+import { getCourseList } from '@/api/course'
 
 export default {
   data() {

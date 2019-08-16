@@ -1,44 +1,24 @@
 <template>
   <div class="app-container">
-    <el-form ref="form" :model="form" label-width="120px">
-      <el-form-item label="Activity name">
-        <el-input v-model="form.name" />
+    <el-form ref="form" :model="form" :rules="rules" label-width="120px" class="form-container">
+      <el-form-item label="课程名称" prop="courseName">
+        <el-input v-model="form.courseName" style="width:720px;"/>
       </el-form-item>
-      <el-form-item label="Activity zone">
-        <el-select v-model="form.region" placeholder="please select your zone">
-          <el-option label="Zone one" value="shanghai" />
-          <el-option label="Zone two" value="beijing" />
-        </el-select>
+      <el-form-item label="课程人数" prop="capacity">
+        <el-input v-model="form.capacity" type="number" style="width:120px;"/>
       </el-form-item>
-      <el-form-item label="Activity time">
-        <el-col :span="11">
-          <el-date-picker v-model="form.date1" type="date" placeholder="Pick a date" style="width: 100%;" />
+      <el-row>
+        <el-col :span="3">
+          <el-form-item label="有效">
+            <el-switch v-model="form.isActive" active-value="1" inactive-value="0" />
+          </el-form-item>
         </el-col>
-        <el-col :span="2" class="line">-</el-col>
-        <el-col :span="11">
-          <el-time-picker v-model="form.date2" type="fixed-time" placeholder="Pick a time" style="width: 100%;" />
+         <el-col :span="3">
+          <el-form-item label="私教课">
+            <el-switch v-model="form.isPersonalTraining" active-value="1" inactive-value="0"  />
+          </el-form-item>
         </el-col>
-      </el-form-item>
-      <el-form-item label="Instant delivery">
-        <el-switch v-model="form.delivery" />
-      </el-form-item>
-      <el-form-item label="Activity type">
-        <el-checkbox-group v-model="form.type">
-          <el-checkbox label="Online activities" name="type" />
-          <el-checkbox label="Promotion activities" name="type" />
-          <el-checkbox label="Offline activities" name="type" />
-          <el-checkbox label="Simple brand exposure" name="type" />
-        </el-checkbox-group>
-      </el-form-item>
-      <el-form-item label="Resources">
-        <el-radio-group v-model="form.resource">
-          <el-radio label="Sponsor" />
-          <el-radio label="Venue" />
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="Activity form">
-        <el-input v-model="form.desc" type="textarea" />
-      </el-form-item>
+      </el-row>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">Create</el-button>
         <el-button @click="onCancel">Cancel</el-button>
@@ -48,24 +28,44 @@
 </template>
 
 <script>
+import { saveCourse } from '@/api/course'
+
 export default {
   data() {
+    const validateRequire = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('必填项'))
+      } else {
+        callback()
+      }
+    }
     return {
       form: {
-        name: '',
-        region: '',
-        date1: '',
-        date2: '',
-        delivery: false,
-        type: [],
-        resource: '',
-        desc: ''
-      }
+        courseName: '',
+        capacity: '',
+        isActive: '1',
+        isPersonalTraining: '0'
+      },
+      rules: {
+        courseName: [{ validator: validateRequire }],
+        capacity: [{ validator: validateRequire }]
+      },
     }
   },
   methods: {
     onSubmit() {
-      this.$message('submit!')
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          saveCourse(this.form).then(response=>{
+            this.$notify({
+              title: '成功',
+              message: '保存课程成功',
+              type: 'success',
+              duration: 2000
+            })
+          })
+        }
+      })
     },
     onCancel() {
       this.$message({
